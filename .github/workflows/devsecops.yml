@@ -38,7 +38,7 @@ jobs:
 
       - name: Push Docker Image
         run: |
-            docker push my-secure-app:${{ github.sha }}
+            docker push ${{ secrets.DOCKER_USERNAME }}/my-secure-app:${{ github.sha }}
       - name: Tag and Push Latest
         run: |
           docker tag my-secure-app:${{ github.sha }} ${{secrets.DOCKER_USERNAME }}/my-secure-app:latest
