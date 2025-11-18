@@ -1,0 +1,31 @@
+name: DevSecOps Pipeline
+
+on: 
+  push:
+    branches: ["main", "master"]
+  pull_request:
+    branches: ["main", "master"]
+jobs:
+  build-and-secure:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build Docker Image
+        run: |
+          docker build -f docker/Dockerfile -t my-secure-app:${{ github.sha }} .
+
+      - name: Run Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'my-secure-app:${{ github.sha }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          secerity: 'CRITICAL,HIGH'
+      - name: Report Status
+        if: always()
+        run: echo "Security Scan Completed."
