@@ -5,6 +5,8 @@ on:
     branches: ["main", "master"]
   pull_request:
     branches: ["main", "master"]
+env:
+  IMAGE_NAME: my-app
 jobs:
   build-and-secure:
     runs-on: ubuntu-latest
@@ -15,12 +17,12 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -f docker/DockerFile -t my-secure-app:${{ github.sha }} .
+          docker build -f docker/DockerFile -t ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
 
       - name: Run Trivy Vulnerability Scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'my-secure-app:${{ github.sha }}'
+          image-ref: '${{ env.IMAGE_NAME }}:${{ github.sha }}'
           format: 'table'
           exit-code: '1'
           ignore-unfixed: true
@@ -38,8 +40,8 @@ jobs:
 
       - name: Push Docker Image
         run: |
-            docker push ${{ secrets.DOCKER_USERNAME }}/my-secure-app:${{ github.sha }}
+            docker push ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
       - name: Tag and Push Latest
         run: |
-          docker tag my-secure-app:${{ github.sha }} ${{secrets.DOCKER_USERNAME }}/my-secure-app:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/my-secure-app:latest
+          docker tag ${{secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} ${{secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
