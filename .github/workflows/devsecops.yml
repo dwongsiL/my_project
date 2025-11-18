@@ -14,6 +14,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+      
+      - name: Run Trivy FS
+        uses: aquasecurity/trivy-action@mastert
+        with:
+          scan: 'fs'
+          scan-ref: '.'
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
 
       - name: Build Docker Image
         run: |
